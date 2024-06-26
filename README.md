@@ -37,11 +37,8 @@ npm run dev
 
 <br/>
 
-<details>
-    <summary> <strong>기술 스택</strong> </summary>
-  <br/>
-  
 ### Next.js
+
 ---
 
 - 기획에 제시된 사이트 특성상 다수의 프로덕트 페이지가 존재하며, 해당 페이지 별 SEO가 중요할 것이라고 판단하여 `Next.js`를 도입
@@ -124,7 +121,6 @@ npm run dev
 ---
 
 - 토스트 컴포넌트 구현시 개별 토스트에 유니크한 `id`값을 부여하기 위해 사용
-</details>
 
 <br/>
 
