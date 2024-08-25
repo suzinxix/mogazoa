@@ -7,6 +7,7 @@ import { MutableRefObject, useEffect, useState, useRef, useCallback, useMemo, Ke
 import { useForm, SubmitHandler, useWatch } from "react-hook-form";
 import { QUERY } from "@/_home/constants";
 import { useSuggestions } from "@/components/Gnb/SearchInput/hooks/useSuggestions";
+import { Toast } from "@/components/Toast";
 import useOutsideClick from "@/hooks/useOutsideClick";
 import cn from "@/utils/classNames";
 import { SEARCH_ICON } from "@/utils/constant";
@@ -33,6 +34,8 @@ export default function SearchInput({ isOpen, inputRef, onClick }: SearchInputPr
   const [suggestions, setSuggestions] = useState<ProductType[]>([]);
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
 
+  const [toast, setToast] = useState<Toast | null>(null);
+
   const containerRef = useRef<HTMLFormElement | null>(null);
   const listRef = useRef<HTMLUListElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
@@ -45,7 +48,14 @@ export default function SearchInput({ isOpen, inputRef, onClick }: SearchInputPr
   const debouncedRefetch = useMemo(() => debounce(refetch, 300), [refetch]);
 
   const onSubmit: SubmitHandler<KeywordType> = ({ keyword }) => {
-    router.push(`/?${createQueryString("keyword", keyword, searchParams)}`);
+    if (!watched) {
+      toast?.caution("검색어를 입력해주세요.");
+      setTimeout(() => {
+        setValue("keyword", param ?? "");
+      }, 1000);
+    } else {
+      router.push(`/?${createQueryString("keyword", keyword, searchParams)}`);
+    }
   };
 
   const resetSuggestions = () => {
@@ -94,6 +104,11 @@ export default function SearchInput({ isOpen, inputRef, onClick }: SearchInputPr
   }, [pathName, reset]);
 
   useEffect(() => {
+    const toastInstance = Toast.getInstance();
+    setToast(toastInstance);
+  }, []);
+
+  useEffect(() => {
     if (list) {
       setSuggestions(list);
     }
@@ -137,12 +152,13 @@ export default function SearchInput({ isOpen, inputRef, onClick }: SearchInputPr
       <input
         className={cn(
           styles.input,
-          !isOpen && styles.closed,
+          !isOpen && !param && styles.closed,
           suggestions.length > 0 && watched !== suggestions[0].name && styles.suggestions,
         )}
         placeholder='상품 이름을 검색해 보세요'
+        defaultValue={param ?? ""}
         autoComplete='off'
-        {...register("keyword", { required: true })}
+        {...register("keyword", { required: false })}
         onKeyDown={handleKeyDown}
         onClick={() => setFocusedIndex(null)}
         ref={(e) => {
